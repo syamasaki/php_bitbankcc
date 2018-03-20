@@ -1,0 +1,4 @@
+.env
+.idea
+vendor/*
+bin/sample_real.php
