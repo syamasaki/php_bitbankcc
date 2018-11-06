@@ -5,13 +5,12 @@
     "guzzlehttp/guzzle" :  "~6.3.0",
     "vlucas/phpdotenv": "2.3",
     "symfony/options-resolver" : "^3.4",
-    "jwage/purl": "^0.0.7"
+    "jwage/purl": "^0.0.10"
   },
   "require-dev": {
     "phpunit/phpunit": "4.6",
     "squizlabs/php_codesniffer": "2.*",
-    "phpmd/phpmd" : "2.*",
-    "sstalle/php7cc": "1.*"
+    "phpmd/phpmd" : "2.*"
   },
   "autoload": {
     "psr-4": {

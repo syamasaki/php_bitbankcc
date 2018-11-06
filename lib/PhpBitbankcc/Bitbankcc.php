@@ -1,17 +1,11 @@
 <?php
 namespace PhpBitbankcc\PhpBitbankcc;
 
-use Symfony\Component\OptionsResolver\OptionsResolver;
-
 /**
  * Class Bitbankcc
  * @package PhpBitbankcc\PhpBitbankcc
  *
- * when you encounter error about
- * https://github.com/google/google-api-php-client/issues/843
- *
- * Sean Yamasaki <sho.yamasaki@gmail.com>
- * http://seany.jp
+ * Shohei Yamasaki <sho.yamasaki@gmail.com>
  */
 class Bitbankcc
 {
@@ -24,11 +18,6 @@ class Bitbankcc
      * @var string
      */
     private static $basePublicUrl = "https://public.bitbank.cc";
-
-    /**
-     * @var bool
-     */
-    private static $ssl = true;
 
     /**
      * @var string
@@ -44,47 +33,39 @@ class Bitbankcc
     /**
      * @param string $key
      * @param string $secret
-     * @param array $params
      */
-    public function initialize(string $key, string $secret, array $params = [])
+    public function initialize(string $key, string $secret)
     {
         $this->key = $key;
         $this->secret = $secret;
-
-        $optionsResolver = new OptionsResolver();
-        $optionsResolver->setDefaults([
-            "base_url" => null,
-            "ssl" => null
-        ]);
-        $params = $optionsResolver->resolve($params);
-
-        if ($params["base_url"] !== null) {
-            self::$baseUrl = $params["base_url"];
-        }
-        if ($params["ssl"] !== null) {
-            self::$ssl = $params["ssl"];
-        }
     }
 
     /**
-     * @return string
-     * TODO: implement
+     * @return array
      */
     public function readBalance()
     {
-//        $path = "/v1/user/assets";
-//        $nonce = (string) (new \DateTime())->getTimestamp();
-//        return $this->requestForGet($path, $nonce);
-
-        throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
+        $path = "/v1/user/assets";
+        $nonce = $this->createNonce();
+        return $this->requestForGet($path, $nonce);
     }
 
     /**
-     * @throws \PhpBitbankcc\PhpBitbankcc\Exception
+     * @return array
      */
-    public function readActiveOrders()
+    public function readActiveOrders($pair, $count = null, $fromId = null, $endId = null, $since = null, $end = null)
     {
-        throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
+        $path = "/v1/user/spot/active_orders";
+        $nonce = $this->createNonce();
+        $params = [
+            "pair" => $pair,
+            "count" => $count,
+            "from_id" => $fromId,
+            "end_id" => $endId,
+            "since" => $since,
+            "end" => $end
+        ];
+        return $this->requestForGet($path, $nonce, $params);
     }
 
     /**
@@ -92,6 +73,7 @@ class Bitbankcc
      */
     public function createOrder()
     {
+        $path = "/v1/user/spot/order";
         throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
     }
 
@@ -100,6 +82,7 @@ class Bitbankcc
      */
     public function cancelOrder()
     {
+        $path = "/v1/user/spot/cancel_order";
         throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
     }
 
@@ -108,6 +91,7 @@ class Bitbankcc
      */
     public function readTradeHistory()
     {
+        $path = "/v1/user/spot/trade_history";
         throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
     }
 
@@ -116,6 +100,7 @@ class Bitbankcc
      */
     public function readWithdrawalAccount()
     {
+        $path = "/v1/user/withdrawal_account";
         throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
     }
 
@@ -124,6 +109,7 @@ class Bitbankcc
      */
     public function requestWithdrawal()
     {
+        $path = "/v1/user/request_withdrawal";
         throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
     }
 
@@ -135,13 +121,11 @@ class Bitbankcc
     {
         $path = self::$basePublicUrl."/{$pair}/ticker";
 
-        $client = new \GuzzleHttp\Client([
-            "base_url" => self::$baseUrl
-        ]);
+        $client = new \GuzzleHttp\Client();
         $response = $client->request("GET", $path, [
             "http_errors" => false
         ]);
-        return (string) $response->getBody();
+        return json_decode($response->getBody(), true);
     }
 
     /**
@@ -150,17 +134,13 @@ class Bitbankcc
      */
     public function readOrderBooks(string $pair)
     {
-//        $path = self::$basePublicUrl."/{$pair}/depth";
-//
-//        $client = new \GuzzleHttp\Client([
-//            "base_url" => self::$baseUrl
-//        ]);
-//        $response = $client->request("GET", $path, [
-//            "http_errors" => false
-//        ]);
-//        return (string) $response->getBody();
+        $path = self::$basePublicUrl."/{$pair}/depth";
 
-        throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
+        $client = new \GuzzleHttp\Client();
+        $response = $client->request("GET", $path, [
+            "http_errors" => false
+        ]);
+        return json_decode($response->getBody(), true);
     }
 
     /**
@@ -170,16 +150,14 @@ class Bitbankcc
      */
     public function readTransactions(string $pair, string $date = "")
     {
-//        $path = self::$basePublicUrl."/{$pair}/transactions".($date === "") ? "" : "/".$date;
-//        $client = new \GuzzleHttp\Client([
-//            "base_url" => self::$baseUrl
-//        ]);
-//        $response = $client->request("GET", $path, [
-//            "http_errors" => false
-//        ]);
-//        return (string) $response->getBody();
-        throw new \PhpBitbankcc\PhpBitbankcc\Exception("Todo: implement");
+        $path = self::$basePublicUrl."/{$pair}/transactions".($date === "") ? "" : "/".$date;
+        $client = new \GuzzleHttp\Client();
+        $response = $client->request("GET", $path, [
+            "http_errors" => false
+        ]);
+        return (string) $response->getBody();
     }
+
 
     /******* private methods ********/
 
@@ -187,7 +165,7 @@ class Bitbankcc
      * @param string $path
      * @param string $nonce
      * @param array $query
-     * @return string
+     * @return array
      */
     private function requestForGet(string $path, string $nonce, array $query = [])
     {
@@ -195,7 +173,7 @@ class Bitbankcc
         $signature = $this->getGetSignature($path, $this->secret, $nonce, $query);
 
         $headers = [
-            "Content-Type" => "application/json",
+            "ACCEPT" => "application/json",
             "ACCESS-KEY" => $this->key,
             "ACCESS-NONCE" => $nonce,
             "ACCESS-SIGNATURE" => $signature
@@ -204,18 +182,15 @@ class Bitbankcc
         $urlQuery = $purl->getQuery()["query"];
         $urlQuery = ($urlQuery !== null) ? $urlQuery : [];
 
-        // Todo: care about ssl
-        // Todo: error handling
-        $client = new \GuzzleHttp\Client([
-            "base_url" => self::$baseUrl
-        ]);
-        $response = $client->request("GET", $path, [
+        $client = new \GuzzleHttp\Client();
+        $response = $client->get(self::$baseUrl.$path, [
             "query" => $urlQuery,
-            "allow_redirects" => true,
+            "allow_redirects" => false,
             "headers" => $headers,
             "http_errors" => false
         ]);
-        return (string) $response->getBody();
+
+        return json_decode($response->getBody(), true);
     }
 
     /**
@@ -230,24 +205,19 @@ class Bitbankcc
         $signature = $this->getPostSignature($this->secret, $nonce, $body);
 
         $headers = [
-            "Content-Type" => "application/json",
+            "ACCEPT" => "application/json",
             "ACCESS-KEY" => $this->key,
             "ACCESS-NONCE" => $nonce,
-            "ACCESS-SIGNATURE" => $signature,
-            "ACCEPT" => "application/json"
+            "ACCESS-SIGNATURE" => $signature
         ];
 
         $urlQuery = $purl->getQuery()["query"];
         $urlQuery = ($urlQuery !== null) ? $urlQuery : [];
 
-        // Todo: care about ssl
-        // Todo: error handling
-        $client = new \GuzzleHttp\Client([
-            "base_url" => self::$baseUrl
-        ]);
+        $client = new \GuzzleHttp\Client();
         $response = $client->request("POST", $path, [
             "query" => $urlQuery,
-            "allow_redirects" => true,
+            "allow_redirects" => false,
             "headers" => $headers,
             "body" => $body,
             "http_errors" => false
@@ -279,5 +249,13 @@ class Bitbankcc
     {
         $message = $nonce . $body;
         return hash_hmac("sha256", $message, $secretKey);
+    }
+
+    /**
+     * @return mixed
+     */
+    private function createNonce()
+    {
+        return microtime(true) * 1000;
     }
 }
