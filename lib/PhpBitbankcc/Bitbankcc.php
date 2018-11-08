@@ -115,7 +115,7 @@ class Bitbankcc
 
     /**
      * @param string $pair
-     * @return string
+     * @return array
      */
     public function readTicker(string $pair)
     {
